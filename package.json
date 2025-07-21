@@ -1,0 +1,24 @@
+{
+  "name": "rainbow-fish-dice-roller",
+  "version": "1.0.0",
+  "description": "Welcome to the Rainbow Fish Dice Roller project. More details to come!",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+"build": "echo 'Building the app...'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tiation/rainbow-fish-dice-roller.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tiation/rainbow-fish-dice-roller/issues"
+  },
+  "homepage": "https://github.com/tiation/rainbow-fish-dice-roller#readme"
+}
