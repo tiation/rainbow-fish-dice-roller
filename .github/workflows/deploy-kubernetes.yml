@@ -1,0 +1,61 @@
+name: Deploy to Local Kubernetes
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'helm/**'
+      - '.github/workflows/deploy-kubernetes.yml'
+
+env:
+  K8S_NAMESPACE: dice-roller
+  REGISTRY_URL: ghcr.io/tiation/rainbow-fish-dice-roller
+  APP_NAME: rainbow-fish-dice-roller
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+    
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: K8s deployment
+        run: |
+          kubectl create namespace $K8S_NAMESPACE || true
+          helm repo add dice-roller ./helm || true
+          helm upgrade --install $APP_NAME ./helm/rainbow-fish-dice-roller \
+            --set image.repository=$REGISTRY_URL \
+            --set image.tag=latest \
+            --namespace $K8S_NAMESPACE \
+            --create-namespace \
+            --wait
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods --namespace $K8S_NAMESPACE -o wide
+          kubectl rollout status deployment/$APP_NAME --namespace $K8S_NAMESPACE
+
+      - name: Post-deployment cleanup
+        run: |
+          kubectl delete pod -l app.kubernetes.io/name=$APP_NAME --namespace $K8S_NAMESPACE || echo 'No pods to clean up'
+        
+      - name: Notify post-deployment
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Kubernetes Deployment Successful: $APP_NAME"}' ${{ secrets.SLACK_WEBHOOK_URL }} || true

@@ -1,0 +1,158 @@
+name: Deploy to Hostinger VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      vps_host:
+        description: 'VPS hostname'
+        required: true
+        default: 'docker.sxc.codes'
+        type: choice
+        options:
+          - docker.sxc.codes
+          - docker.tiation.net
+          - ubuntu.sxc.codes
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'Dockerfile'
+      - '.github/workflows/deploy-hostinger.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/rainbow-fish-dice-roller
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.vps_host || 'docker.sxc.codes' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'production' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set deployment variables
+        id: vars
+        run: |
+          case "${{ inputs.vps_host || 'docker.sxc.codes' }}" in
+            "docker.sxc.codes")
+              echo "host_ip=145.223.22.7" >> $GITHUB_OUTPUT
+              echo "container_port=3000" >> $GITHUB_OUTPUT
+              ;;
+            "docker.tiation.net")
+              echo "host_ip=145.223.22.9" >> $GITHUB_OUTPUT
+              echo "container_port=3001" >> $GITHUB_OUTPUT
+              ;;
+            "ubuntu.sxc.codes")
+              echo "host_ip=89.116.191.60" >> $GITHUB_OUTPUT
+              echo "container_port=3002" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Build and push Docker image
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ inputs.vps_host || 'docker.sxc.codes' }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          envs: REGISTRY,IMAGE_NAME,GITHUB_SHA
+          script: |
+            # Login to GitHub Container Registry
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login $REGISTRY -u ${{ github.actor }} --password-stdin
+            
+            # Pull latest image
+            docker pull $REGISTRY/$IMAGE_NAME:latest
+            
+            # Create backup of current container
+            if docker ps | grep -q rainbow-fish-dice-roller; then
+              docker commit rainbow-fish-dice-roller rainbow-fish-dice-roller:backup-$(date +%Y%m%d-%H%M%S)
+            fi
+            
+            # Stop and remove existing container
+            docker stop rainbow-fish-dice-roller || true
+            docker rm rainbow-fish-dice-roller || true
+            
+            # Create application directory if it doesn't exist
+            mkdir -p /opt/dice-roller
+            
+            # Run new container with environment-specific configuration
+            docker run -d \
+              --name rainbow-fish-dice-roller \
+              --restart unless-stopped \
+              -p ${{ steps.vars.outputs.container_port }}:80 \
+              -v /opt/dice-roller/logs:/app/logs \
+              -v /opt/dice-roller/data:/app/data \
+              -e NODE_ENV=${{ inputs.environment || 'production' }} \
+              -e HOST=${{ inputs.vps_host || 'docker.sxc.codes' }} \
+              -e PORT=80 \
+              --label "traefik.enable=true" \
+              --label "traefik.http.routers.dice-roller.rule=Host(\`dice-roller.sxc.codes\`)" \
+              --label "traefik.http.services.dice-roller.loadbalancer.server.port=80" \
+              $REGISTRY/$IMAGE_NAME:latest
+            
+            # Clean up old images (keep last 3)
+            docker images $REGISTRY/$IMAGE_NAME --format "table {{.Repository}}:{{.Tag}}" | tail -n +4 | xargs -r docker rmi || true
+            
+            # Health check
+            sleep 15
+            if ! docker ps | grep -q rainbow-fish-dice-roller; then
+              echo "Container failed to start!"
+              exit 1
+            fi
+            
+            # Test endpoint
+            curl -f http://localhost:${{ steps.vars.outputs.container_port }}/ || echo "Warning: Health check endpoint not responding"
+
+      - name: Update monitoring and alerts
+        run: |
+          # Notify monitoring systems
+          curl -X POST "https://grafana.sxc.codes/api/annotations" \
+            -H "Authorization: Bearer ${{ secrets.GRAFANA_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "Rainbow Fish Dice Roller deployed to ${{ inputs.vps_host || '"'"'docker.sxc.codes'"'"' }}",
+              "tags": ["deployment", "dice-roller", "${{ inputs.environment || '"'"'production'"'"' }}"],
+              "time": '$(date +%s000)'
+            }' || true
+
+      - name: Send deployment notification
+        if: always()
+        run: |
+          STATUS=${{ job.status }}
+          if [ "$STATUS" = "success" ]; then
+            MESSAGE="✅ Rainbow Fish Dice Roller successfully deployed to ${{ inputs.vps_host || 'docker.sxc.codes' }}"
+            COLOR="good"
+          else
+            MESSAGE="❌ Deployment to ${{ inputs.vps_host || 'docker.sxc.codes' }} failed"
+            COLOR="danger"
+          fi
+          
+          # Send email notification
+          curl -X POST https://api.mailgun.net/v3/mg.sxc.codes/messages \
+            -u "api:${{ secrets.MAILGUN_API_KEY }}" \
+            -F from="DevOps <devops@sxc.codes>" \
+            -F to="tiatheone@protonmail.com,garrett@sxc.codes,garrett.dillman@gmail.com" \
+            -F subject="Dice Roller Deployment - $STATUS" \
+            -F text="$MESSAGE" || true

@@ -1,24 +1,85 @@
 {
-  "name": "rainbow-fish-dice-roller",
-  "version": "1.0.0",
-  "description": "Welcome to the Rainbow Fish Dice Roller project. More details to come!",
-  "main": "index.js",
+  "name": "@rainbow-fish/dice-roller",
+  "version": "2.0.0",
+  "description": "Rainbow Fish Themed PWA Dice Roller - Enterprise-grade dice rolling application with animations, sound effects, and offline support",
+  "main": "dist/index.js",
+  "type": "module",
   "directories": {
+    "src": "src",
+    "public": "public",
+    "dist": "dist",
+    "test": "tests",
     "doc": "docs"
   },
   "scripts": {
-"build": "echo 'Building the app...'"
+    "start": "vite preview --port 3002",
+    "dev": "vite --port 3002 --host",
+    "build": "npm run clean && vite build && npm run build:pwa",
+    "build:pwa": "workbox generateSW workbox-config.js",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "lint": "eslint src tests --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src tests --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "clean": "rimraf dist build coverage .vite",
+    "setup": "npm install && npm run build",
+    "docker:build": "docker build -t rainbow-fish/dice-roller .",
+    "docker:run": "docker run -p 3002:3002 rainbow-fish/dice-roller",
+    "deploy": "npm run build && echo 'Deploying dice roller PWA...'",
+    "health-check": "curl -f http://localhost:3002/health || exit 1",
+    "lighthouse": "lighthouse http://localhost:3002 --output html --output-path ./lighthouse-report.html",
+    "pwa-asset-generator": "pwa-asset-generator src/assets/logo.svg public/icons --background '#1a1a2e' --theme-color '#16537e' --type png --padding '10%'"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tiation/rainbow-fish-dice-roller.git"
+    "url": "git+https://github.com/tiation/garrett-dillman-the-rainbow-fish-extraordinaire.git",
+    "directory": "packages/rainbow-fish-dice-roller"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "dice",
+    "gaming",
+    "random",
+    "tabletop",
+    "rpg",
+    "enterprise"
+  ],
+  "author": "Garrett Dillman <garrett@sxc.codes>",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/tiation/rainbow-fish-dice-roller/issues"
+    "url": "https://github.com/tiation/garrett-dillman-the-rainbow-fish-extraordinaire/issues"
   },
-  "homepage": "https://github.com/tiation/rainbow-fish-dice-roller#readme"
+  "homepage": "https://github.com/tiation/garrett-dillman-the-rainbow-fish-extraordinaire/tree/main/packages/rainbow-fish-dice-roller#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "lottie-web": "^5.12.2",
+    "howler": "^2.2.4",
+    "idb": "^7.1.1",
+    "workbox-window": "^7.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/user-event": "^14.5.1",
+    "@types/howler": "^2.2.11",
+    "@vitest/coverage-v8": "^0.34.6",
+    "@vitest/ui": "^0.34.6",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "happy-dom": "^12.10.3",
+    "lighthouse": "^11.4.0",
+    "prettier": "^3.1.0",
+    "pwa-asset-generator": "^6.3.1",
+    "rimraf": "^5.0.5",
+    "sass": "^1.69.5",
+    "vite": "^5.0.4",
+    "vite-plugin-pwa": "^0.17.4",
+    "vitest": "^0.34.6",
+    "workbox-cli": "^7.0.0"
+  }
 }

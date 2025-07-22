@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- PWA Meta Tags -->
+    <title>Rainbow Fish Dice Roller</title>
+    <meta name="description" content="Enterprise-grade rainbow fish themed dice rolling PWA with animations, sound effects, and offline support">
+    <meta name="keywords" content="dice, roller, rainbow, fish, PWA, gaming, tabletop, RPG">
+    <meta name="author" content="Garrett Dillman">
+    
+    <!-- Theme and Display -->
+    <meta name="theme-color" content="#16537e">
+    <meta name="background-color" content="#1a1a2e">
+    <meta name="display" content="standalone">
+    
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RainbowDice">
+    
+    <!-- Windows -->
+    <meta name="msapplication-TileColor" content="#16537e">
+    <meta name="msapplication-TileImage" content="./mstile-150x150.png">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="./src/styles/main.scss" as="style">
+    <link rel="preload" href="./src/assets/sounds/dice-roll.mp3" as="audio">
+    <link rel="preload" href="./src/assets/sounds/success.mp3" as="audio">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;700&family=Fredoka:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="icon" href="./favicon.ico" sizes="any">
+    <link rel="icon" href="./icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="./src/styles/main.scss">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="rainbow-fish-loader">
+            <div class="fish-body"></div>
+            <div class="fish-tail"></div>
+            <div class="bubble bubble-1"></div>
+            <div class="bubble bubble-2"></div>
+            <div class="bubble bubble-3"></div>
+        </div>
+        <p class="loading-text">Loading Rainbow Fish Dice Roller...</p>
+    </div>
+
+    <!-- Main Application -->
+    <main id="app" class="app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <h1 class="app-title">
+                🌈 Rainbow Fish Dice Roller 🐟
+            </h1>
+            <button id="settings-btn" class="settings-btn" aria-label="Open settings">
+                ⚙️
+            </button>
+        </header>
+
+        <!-- Dice Display Area -->
+        <section class="dice-section" aria-label="Dice rolling area">
+            <div class="dice-container">
+                <div id="dice-display" class="dice-display" aria-live="polite" aria-label="Current dice value">
+                    🎲
+                </div>
+                <div class="rainbow-particles" id="particles"></div>
+            </div>
+            
+            <!-- Roll History -->
+            <div class="roll-history" aria-label="Recent rolls">
+                <h3>Recent Rolls</h3>
+                <ul id="history-list" class="history-list"></ul>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <section class="controls-section">
+            <!-- Dice Type Selector -->
+            <div class="dice-selector">
+                <label for="dice-type">Choose your dice:</label>
+                <select id="dice-type" class="dice-select">
+                    <option value="6">🎲 D6 (Standard)</option>
+                    <option value="4">🔺 D4</option>
+                    <option value="8">🔷 D8</option>
+                    <option value="10">🔶 D10</option>
+                    <option value="12">⭐ D12</option>
+                    <option value="20">💎 D20</option>
+                </select>
+            </div>
+
+            <!-- Number of Dice -->
+            <div class="dice-count">
+                <label for="dice-count">Number of dice:</label>
+                <input type="range" id="dice-count" min="1" max="10" value="1" class="range-input">
+                <span id="dice-count-display" class="count-display">1</span>
+            </div>
+
+            <!-- Roll Button -->
+            <button id="roll-btn" class="roll-btn" aria-label="Roll the dice">
+                <span class="btn-text">Roll the Dice! 🌊</span>
+                <div class="btn-ripple"></div>
+            </button>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button id="clear-history-btn" class="quick-btn" aria-label="Clear roll history">
+                    🗑️ Clear History
+                </button>
+                <button id="stats-btn" class="quick-btn" aria-label="View statistics">
+                    📊 Stats
+                </button>
+            </div>
+        </section>
+
+        <!-- Statistics Modal -->
+        <div id="stats-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🐟 Rolling Statistics</h2>
+                    <button id="close-stats" class="close-btn" aria-label="Close statistics">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Rolls</span>
+                            <span id="total-rolls" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Average Roll</span>
+                            <span id="avg-roll" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Highest Roll</span>
+                            <span id="highest-roll" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Lowest Roll</span>
+                            <span id="lowest-roll" class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⚙️ Settings</h2>
+                    <button id="close-settings" class="close-btn" aria-label="Close settings">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-item">
+                        <label class="setting-label">
+                            <input type="checkbox" id="sound-enabled" checked>
+                            <span class="checkmark"></span>
+                            Sound Effects
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">
+                            <input type="checkbox" id="animations-enabled" checked>
+                            <span class="checkmark"></span>
+                            Animations
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-label">
+                            <input type="checkbox" id="haptic-enabled" checked>
+                            <span class="checkmark"></span>
+                            Haptic Feedback
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label for="theme-select" class="setting-label">Theme:</label>
+                        <select id="theme-select" class="theme-select">
+                            <option value="rainbow">🌈 Rainbow Fish</option>
+                            <option value="ocean">🌊 Ocean Deep</option>
+                            <option value="coral">🪸 Coral Reef</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offline Indicator -->
+        <div id="offline-indicator" class="offline-indicator hidden">
+            <span>🌊 You're offline - but the dice still roll!</span>
+        </div>
+
+        <!-- Update Available Notification -->
+        <div id="update-notification" class="notification hidden">
+            <div class="notification-content">
+                <span>🐟 New update available!</span>
+                <button id="update-btn" class="update-btn">Update</button>
+                <button id="dismiss-update" class="dismiss-btn">×</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- PWA Installation Banner -->
+    <div id="install-banner" class="install-banner hidden">
+        <div class="install-content">
+            <div class="install-text">
+                <h3>🌈 Install Rainbow Fish Dice Roller</h3>
+                <p>Get the full experience with offline support!</p>
+            </div>
+            <button id="install-btn" class="install-btn">Install</button>
+            <button id="dismiss-install" class="dismiss-btn">×</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html>
