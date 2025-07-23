@@ -29,6 +29,16 @@ This modern implementation represents Garrett Dillman's vision realized: where *
 - **DevSecOps Pipeline**: Automated security scanning and compliance
 - **Progressive Web App**: Offline-first with service worker caching
 
+## 📸 Screenshots
+
+### Main Interface
+![Rainbow Fish Dice Roller Interface](./screenshot-1.png)
+*The modern, enterprise-grade dice rolling interface with nostalgic 90s aesthetics*
+
+### Dice Roll Results
+![Dice Roll Results](./screenshot-2.png)
+*Real-time dice rolling with visual feedback and results tracking*
+
 ## Key Features
 
 - **Simple Interface:** Easy-to-use, no-frills, and visually engaging interface reminiscent of the 90s.

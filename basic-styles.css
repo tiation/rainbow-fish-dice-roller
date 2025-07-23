@@ -1,0 +1,343 @@
+/* Basic styles for dice roller with log panel */
+body {
+    font-family: 'Comfortaa', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    color: #333;
+}
+
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
+}
+
+.app {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.app-header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 3px solid #16537e;
+    padding-bottom: 20px;
+}
+
+.app-title {
+    font-size: 2.5em;
+    color: #16537e;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#dice-roller-panel {
+    background: #efefde;
+    border: 3px solid #cc0000;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+#dice-roller-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.checkbox-wrapper {
+    display: inline-flex;
+    align-items: center;
+    background: #efefde;
+    border: 2px solid #cc0000;
+    border-radius: 15px;
+    padding: 5px 15px;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+#expand-all {
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#dice-list {
+    list-style: none;
+    padding: 0;
+}
+
+#dice-list li {
+    position: relative;
+    margin-bottom: 15px;
+    padding-left: 40px;
+}
+
+.button-group {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.button-group button {
+    width: 25px;
+    height: 25px;
+    border: 2px solid #cc0000;
+    background: #efefde;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.d-line {
+    background: #efefde;
+    border: 2px solid #cc0000;
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.main-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.main-controls input,
+.main-controls select,
+.main-controls button {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.d-count {
+    width: 60px;
+}
+
+.d-type {
+    width: 80px;
+}
+
+.d-mod {
+    width: 60px;
+}
+
+.roll {
+    background: #16537e;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.roll:hover {
+    background: #cc0000;
+}
+
+.option-1-controls,
+.option-2-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.7;
+    font-size: 12px;
+}
+
+.d-line.expanded .option-1-controls,
+.d-line.expanded .option-2-controls {
+    opacity: 1;
+}
+
+.option-1-controls select,
+.option-1-controls input,
+.option-2-controls select,
+.option-2-controls input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.line-result {
+    background: white;
+    border: 1px solid #16537e;
+    border-radius: 8px;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #16537e;
+    min-height: 20px;
+    margin-top: 10px;
+}
+
+#dice-roller-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#add-line {
+    background: #00b894;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#roll-all {
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#roll-all:hover,
+#add-line:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+/* Roll Log Panel */
+#roll-log-panel {
+    background: #efefde;
+    border: 3px solid #cc0000;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+#roll-log-panel h2 {
+    color: #16537e;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+#clear-log {
+    background: #16537e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 15px;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+#log-list {
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    list-style: none;
+    margin: 0;
+}
+
+#log-list li {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 0;
+}
+
+#log-list li:last-child {
+    border-bottom: none;
+}
+
+.log-timestamp {
+    color: #666;
+    font-size: 12px;
+}
+
+.log-notation {
+    font-weight: bold;
+    color: #16537e;
+}
+
+.log-result {
+    font-weight: bold;
+    color: #cc0000;
+    font-size: 16px;
+}
+
+.log-details {
+    color: #666;
+    font-size: 12px;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    border-top: 3px solid #16537e;
+}
+
+.footer-links a {
+    color: #16537e;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .app {
+        padding: 10px;
+        margin: 10px;
+    }
+    
+    .app-title {
+        font-size: 1.8em;
+    }
+    
+    .main-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .main-controls input,
+    .main-controls select,
+    .main-controls button {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
