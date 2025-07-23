@@ -1,6 +1,5 @@
 import { playSound } from './utils/sound.js';
-import { openDB } from 'idb';
-import { Workbox } from 'workbox-window';
+// Simplified version without external dependencies
 
 // PWA State Management
 class DiceRollerPWA {
@@ -36,16 +35,33 @@ class DiceRollerPWA {
   }
 
   async initializeDatabase() {
-    this.db = await openDB('RainbowFishDiceDB', 1, {
-      upgrade(db) {
-        const rollStore = db.createObjectStore('rolls', { keyPath: 'id', autoIncrement: true });
-        const settingsStore = db.createObjectStore('settings', { keyPath: 'key' });
-        const statsStore = db.createObjectStore('statistics', { keyPath: 'key' });
-        
-        rollStore.createIndex('timestamp', 'timestamp');
-        rollStore.createIndex('diceType', 'diceType');
+    // Use localStorage for simplified data persistence
+    this.db = {
+      async put(store, data) {
+        localStorage.setItem(`rainbowfish_${store}_${data.key || 'data'}`, JSON.stringify(data));
+      },
+      async add(store, data) {
+        const history = JSON.parse(localStorage.getItem(`rainbowfish_${store}`) || '[]');
+        history.unshift({ ...data, id: Date.now() });
+        localStorage.setItem(`rainbowfish_${store}`, JSON.stringify(history.slice(0, 100)));
+      },
+      async get(store, key) {
+        const item = localStorage.getItem(`rainbowfish_${store}_${key}`);
+        return item ? JSON.parse(item) : null;
+      },
+      transaction(store, mode) {
+        return {
+          objectStore(name) {
+            return {
+              async clear() {
+                localStorage.removeItem(`rainbowfish_${name}`);
+              }
+            };
+          },
+          done: Promise.resolve()
+        };
       }
-    });
+    };
   }
 
   setupEventListeners() {
@@ -383,19 +399,7 @@ class DiceRollerPWA {
   }
 
   setupPWA() {
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      const wb = new Workbox('/sw.js');
-      
-      wb.addEventListener('installed', (event) => {
-        if (event.isUpdate) {
-          this.showUpdateNotification();
-        }
-      });
-      
-      wb.register();
-    }
-    
+    // Simplified PWA setup without external dependencies
     // Handle installation prompt
     let deferredPrompt;
     

@@ -25,7 +25,7 @@
     <meta name="msapplication-TileImage" content="./mstile-150x150.png">
     
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="./src/styles/main.scss" as="style">
+    <link rel="preload" href="./src/styles/main.css" as="style">
     <link rel="preload" href="./src/assets/sounds/dice-roll.mp3" as="audio">
     <link rel="preload" href="./src/assets/sounds/success.mp3" as="audio">
     
@@ -119,6 +119,9 @@
                 <button id="stats-btn" class="quick-btn" aria-label="View statistics">
                     📊 Stats
                 </button>
+                <button id="legacy-btn" class="quick-btn" aria-label="View legacy dice roller">
+                    🎲 Legacy Roller
+                </button>
             </div>
         </section>
 
@@ -189,6 +192,25 @@
                             <option value="coral">🪸 Coral Reef</option>
                         </select>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legacy Dice Roller Modal -->
+        <div id="legacy-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🎲 Legacy DnD Dice Roller</h2>
+                    <button id="close-legacy" class="close-btn" aria-label="Close legacy roller">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <iframe 
+                        src="../dnd-dice-roller-legacy/dnd-diceroller-legacy-plus.html" 
+                        width="100%" 
+                        height="500" 
+                        title="Legacy DnD Dice Roller"
+                        style="border: none; border-radius: 4px;">
+                    </iframe>
                 </div>
             </div>
         </div>

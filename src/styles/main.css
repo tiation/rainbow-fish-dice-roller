@@ -1,8 +1,8 @@
 /* Rainbow Fish Dice Roller - Main Styles */
 
-// CSS Custom Properties for themes
+/* CSS Custom Properties for themes */
 :root {
-  // Rainbow Fish Theme (default)
+  /* Rainbow Fish Theme (default) */
   --primary: #16537e;
   --secondary: #0f4c75;
   --accent: #3282b8;
@@ -14,16 +14,16 @@
   --warning: #ff9800;
   --error: #f44336;
   
-  // Rainbow gradients
+  /* Rainbow gradients */
   --rainbow: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #6c5ce7, #fd79a8);
   --rainbow-soft: linear-gradient(45deg, rgba(255,107,107,0.3), rgba(78,205,196,0.3), rgba(69,183,209,0.3), rgba(249,202,36,0.3), rgba(108,92,231,0.3), rgba(253,121,168,0.3));
   
-  // Fish colors
+  /* Fish colors */
   --fish-primary: #4ecdc4;
   --fish-secondary: #45b7d1;
   --fish-accent: #f9ca24;
   
-  // Animations
+  /* Animations */
   --animation-speed: 0.3s;
   --animation-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --animation-smooth: cubic-bezier(0.4, 0, 0.2, 1);
