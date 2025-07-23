@@ -122,26 +122,50 @@ class DiceRollerWithLog {
         }
 
         this.saveHistoryToStorage();
+        
+        // Dispatch event for authentication integration
+        document.dispatchEvent(new CustomEvent('diceRollComplete', {
+            detail: { 
+                roll: {
+                    timestamp: new Date().toISOString(),
+                    label: label || diceNotation,
+                    diceType,
+                    count,
+                    modifier,
+                    total,
+                    rolls: rolls.slice(),
+                    originalTotal
+                }
+            }
+        }));
     }
 
     saveHistoryToStorage() {
-        try {
-            localStorage.setItem('diceRollerHistory', JSON.stringify(this.rollHistory));
-        } catch (error) {
-            console.error('Failed to save history:', error);
+        // Only save to general storage if no user is logged in
+        if (!window.authManager || !window.authManager.getCurrentUser()) {
+            try {
+                localStorage.setItem('diceRollerHistory', JSON.stringify(this.rollHistory));
+            } catch (error) {
+                console.error('Failed to save history:', error);
+            }
         }
+        // If user is logged in, auth manager handles storage
     }
 
     loadHistoryFromStorage() {
-        try {
-            const saved = localStorage.getItem('diceRollerHistory');
-            if (saved) {
-                this.rollHistory = JSON.parse(saved);
-                this.displayHistoryInLog();
+        // Only load from general storage if no user is logged in
+        if (!window.authManager || !window.authManager.getCurrentUser()) {
+            try {
+                const saved = localStorage.getItem('diceRollerHistory');
+                if (saved) {
+                    this.rollHistory = JSON.parse(saved);
+                    this.displayHistoryInLog();
+                }
+            } catch (error) {
+                console.error('Failed to load history:', error);
             }
-        } catch (error) {
-            console.error('Failed to load history:', error);
         }
+        // If user is logged in, auth manager handles loading
     }
 
     displayHistoryInLog() {

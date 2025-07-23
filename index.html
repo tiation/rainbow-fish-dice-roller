@@ -61,6 +61,14 @@
         <header class="app-header">
             <h1 class="app-title">DND Dice Roller</h1>
             <p>A tribute to the original masterpiece by Garrett Dillman</p>
+            <!-- Authentication -->
+            <div id="auth-section">
+                <input type="text" id="username" placeholder="Username" />
+                <input type="password" id="password" placeholder="Password" />
+                <button id="login-btn" onclick="handleLogin()">Login</button>
+                <button id="logout-btn" onclick="handleLogout()" style="display:none;">Logout</button>
+                <span id="profile-name" style="display:none;"></span>
+            </div>
         </header>
 
         <!-- Dice Roller Panel -->
@@ -136,15 +144,26 @@
 
         <!-- Footer -->
         <footer>
-            <p>Copyright © 2025 DnD Dice Roller. All rights reserved.</p>
+            <p>Copyright © 2025 Rainbow Fish DnD Dice Roller. All rights reserved.</p>
             <div class="footer-links">
-                <a href="#">Home</a> /
-                <a href="#">Terms</a> /
-                <a href="#">Privacy</a> /
-                <a href="#">Contact</a>
+                <a href="javascript:void(0)" onclick="showHome()">Home</a> /
+                <a href="javascript:void(0)" onclick="showUserStats()">Stats</a> /
+                <a href="../dnd-dice-roller-legacy/DnD Dice Roller.html" target="_blank">Legacy</a> /
+                <a href="javascript:void(0)" onclick="showTerms()">Terms</a> /
+                <a href="javascript:void(0)" onclick="showPrivacy()">Privacy</a> /
+                <a href="javascript:void(0)" onclick="showContact()">Contact</a>
+            </div>
+            <div id="version-info" style="margin-top: 10px; font-size: 12px; color: #666;">
+                Version 2.0.0 | <span id="server-status">Server: Local</span> | <span id="user-count">Users: <span id="total-users">0</span></span>
             </div>
         </footer>
     </main>
+
+    <!-- User Authentication -->
+    <script type="text/javascript" src="./src/auth.js"></script>
+    
+    <!-- Navigation and Modals -->
+    <script type="text/javascript" src="./src/navigation.js"></script>
 
     <!-- PWA Installation Banner -->
     <div id="install-banner" class="install-banner hidden">
