@@ -1,0 +1,78 @@
+{
+  "name": "@rainbow-fish/ios",
+  "version": "1.0.0",
+  "description": "Rainbow Fish Dice Roller iOS App - Enterprise D&D dice rolling experience",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "react-native start",
+    "dev": "react-native run-ios",
+    "build": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle",
+    "build:release": "cd ios && xcodebuild -workspace RainbowFishDiceRoller.xcworkspace -scheme RainbowFishDiceRoller -configuration Release -destination generic/platform=iOS -archivePath RainbowFishDiceRoller.xcarchive archive",
+    "test": "jest",
+    "test:e2e": "detox test --configuration ios.sim.debug",
+    "test:e2e:build": "detox build --configuration ios.sim.debug",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "pod-install": "cd ios && pod install",
+    "clean": "cd ios && xcodebuild clean && cd .. && rm -rf node_modules",
+    "reset-cache": "npx react-native start --reset-cache"
+  },
+  "dependencies": {
+    "@rainbow-fish/shared": "1.0.0",
+    "react": "18.2.0",
+    "react-native": "0.73.0",
+    "react-native-reanimated": "^3.6.0",
+    "react-native-gesture-handler": "^2.14.0",
+    "react-native-screens": "^3.29.0",
+    "react-native-safe-area-context": "^4.8.0",
+    "@react-navigation/native": "^6.1.0",
+    "@react-navigation/stack": "^6.3.0",
+    "@react-navigation/bottom-tabs": "^6.5.0",
+    "react-native-vector-icons": "^10.0.0",
+    "react-native-haptic-feedback": "^2.2.0",
+    "react-native-biometrics": "^3.0.0",
+    "react-native-keychain": "^8.1.0",
+    "react-native-device-info": "^10.11.0",
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "react-native-sound": "^0.11.0",
+    "@react-native-camera/camera": "^7.4.0",
+    "react-native-svg": "^14.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
+    "@babel/runtime": "^7.20.0",
+    "@react-native/eslint-config": "^0.73.0",
+    "@react-native/metro-config": "^0.73.0",
+    "@react-native/typescript-config": "^0.73.0",
+    "@types/react": "^18.0.24",
+    "@types/react-test-renderer": "^18.0.0",
+    "babel-jest": "^29.2.1",
+    "detox": "^20.13.0",
+    "eslint": "^8.19.0",
+    "jest": "^29.2.1",
+    "metro-react-native-babel-preset": "0.76.8",
+    "prettier": "^2.4.1",
+    "react-test-renderer": "18.2.0",
+    "typescript": "4.8.4"
+  },
+  "jest": {
+    "preset": "react-native",
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
+  },
+  "detox": {
+    "test-runner": "jest",
+    "runner-config": "e2e/config.json",
+    "configurations": {
+      "ios.sim.debug": {
+        "binaryPath": "ios/Build/Products/Debug-iphonesimulator/RainbowFishDiceRoller.app",
+        "build": "xcodebuild -workspace ios/RainbowFishDiceRoller.xcworkspace -scheme RainbowFishDiceRoller -configuration Debug -sdk iphonesimulator -derivedDataPath ios/Build",
+        "type": "ios.simulator",
+        "device": {
+          "type": "iPhone 15"
+        }
+      }
+    }
+  }
+}

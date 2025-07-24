@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎲 Rainbow Fish Dice Roller - Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #0a1428;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #4fc3f7;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .dice-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .dice-button {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .dice-button:hover {
+            background-color: #2563eb;
+        }
+        
+        .expression-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .expression-input {
+            flex: 1;
+            background-color: #1e293b;
+            color: #ffffff;
+            border: 1px solid #334155;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
+        .roll-button {
+            background-color: #059669;
+            color: #ffffff;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .roll-button:hover {
+            background-color: #047857;
+        }
+        
+        .history-container {
+            background-color: #1e293b;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .history-title {
+            color: #4fc3f7;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .clear-button {
+            background-color: #dc2626;
+            color: #ffffff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .clear-button:hover {
+            background-color: #b91c1c;
+        }
+        
+        .roll-item {
+            background-color: #334155;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .roll-expression {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+        
+        .roll-total {
+            color: #4fc3f7;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .roll-time {
+            color: #64748b;
+            font-size: 12px;
+        }
+        
+        .empty-history {
+            color: #64748b;
+            text-align: center;
+            font-size: 16px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Rainbow Fish Dice Roller</h1>
+        
+        <!-- Quick dice buttons -->
+        <div class="dice-grid">
+            <button class="dice-button" onclick="rollDie('d4')">D4</button>
+            <button class="dice-button" onclick="rollDie('d6')">D6</button>
+            <button class="dice-button" onclick="rollDie('d8')">D8</button>
+            <button class="dice-button" onclick="rollDie('d10')">D10</button>
+            <button class="dice-button" onclick="rollDie('d12')">D12</button>
+            <button class="dice-button" onclick="rollDie('d20')">D20</button>
+            <button class="dice-button" onclick="rollDie('d100')">D100</button>
+        </div>
+        
+        <!-- Custom expression input -->
+        <div class="expression-container">
+            <input class="expression-input" id="customExpression" value="1d20" placeholder="Enter dice expression (e.g., 2d6+3)">
+            <button class="roll-button" onclick="rollExpression()">Roll</button>
+        </div>
+        
+        <!-- Roll history -->
+        <div class="history-container">
+            <div class="history-header">
+                <div class="history-title">Roll History</div>
+                <button class="clear-button" onclick="clearHistory()">Clear</button>
+            </div>
+            
+            <div id="historyContainer">
+                <div class="empty-history">No rolls yet. Start rolling!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple dice engine implementation
+        class DiceEngine {
+            constructor() {
+                this.rollHistory = [];
+            }
+            
+            rollDie(type, modifier = 0) {
+                const sides = this.getDiceSides(type);
+                const baseValue = Math.floor(Math.random() * sides) + 1;
+                
+                return {
+                    id: this.generateId(),
+                    type,
+                    value: baseValue,
+                    timestamp: new Date(),
+                    modifier
+                };
+            }
+            
+            rollExpression(expression) {
+                const cleanExpr = expression.replace(/\s/g, '').toLowerCase();
+                const results = [];
+                let total = 0;
+                
+                // Simple parser for basic expressions like "2d6+3"
+                const match = cleanExpr.match(/(\d*)d(\d+)([+-]\d+)?/);
+                
+                if (match) {
+                    const count = parseInt(match[1]) || 1;
+                    const sides = parseInt(match[2]);
+                    const modifier = match[3] ? parseInt(match[3]) : 0;
+                    
+                    const type = `d${sides}`;
+                    
+                    for (let i = 0; i < count; i++) {
+                        const result = this.rollDie(type);
+                        results.push(result);
+                        total += result.value;
+                    }
+                    
+                    total += modifier;
+                }
+                
+                const roll = {
+                    id: this.generateId(),
+                    dice: results,
+                    total,
+                    expression,
+                    timestamp: new Date()
+                };
+                
+                this.rollHistory.push(roll);
+                return roll;
+            }
+            
+            getDiceSides(type) {
+                const sides = {
+                    'd4': 4,
+                    'd6': 6,
+                    'd8': 8,
+                    'd10': 10,
+                    'd12': 12,
+                    'd20': 20,
+                    'd100': 100
+                };
+                return sides[type];
+            }
+            
+            generateId() {
+                return Math.random().toString(36).substr(2, 9);
+            }
+            
+            getHistory() {
+                return [...this.rollHistory];
+            }
+            
+            clearHistory() {
+                this.rollHistory = [];
+            }
+        }
+        
+        // Initialize dice engine
+        const diceEngine = new DiceEngine();
+        
+        // UI functions
+        function rollDie(type) {
+            const result = diceEngine.rollDie(type);
+            const roll = {
+                id: result.id,
+                dice: [result],
+                total: result.value,
+                expression: `1${type}`,
+                timestamp: new Date(),
+            };
+            
+            diceEngine.rollHistory.push(roll);
+            updateHistoryDisplay();
+        }
+        
+        function rollExpression() {
+            const expression = document.getElementById('customExpression').value;
+            const roll = diceEngine.rollExpression(expression);
+            updateHistoryDisplay();
+        }
+        
+        function clearHistory() {
+            diceEngine.clearHistory();
+            updateHistoryDisplay();
+        }
+        
+        function updateHistoryDisplay() {
+            const historyContainer = document.getElementById('historyContainer');
+            const history = diceEngine.getHistory();
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<div class="empty-history">No rolls yet. Start rolling!</div>';
+                return;
+            }
+            
+            const historyHTML = history.slice().reverse().map(roll => `
+                <div class="roll-item">
+                    <span class="roll-expression">${roll.expression}</span>
+                    <span class="roll-total">= ${roll.total}</span>
+                    <span class="roll-time">${roll.timestamp.toLocaleTimeString()}</span>
+                </div>
+            `).join('');
+            
+            historyContainer.innerHTML = historyHTML;
+        }
+        
+        // Test the dice engine on load
+        console.log('🎲 Rainbow Fish Dice Roller loaded successfully!');
+        console.log('Click dice buttons or enter custom expressions to test.');
+    </script>
+</body>
+</html>

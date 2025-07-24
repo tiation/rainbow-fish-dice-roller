@@ -1,0 +1,80 @@
+{
+  "name": "@rainbow-fish/android",
+  "version": "1.0.0",
+  "description": "Rainbow Fish Dice Roller Android App - Enterprise D&D dice rolling experience",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "react-native start",
+    "dev": "react-native run-android",
+    "build": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle",
+    "build:release": "cd android && ./gradlew assembleRelease",
+    "build:bundle": "cd android && ./gradlew bundleRelease",
+    "test": "jest",
+    "test:e2e": "detox test --configuration android.emu.debug",
+    "test:e2e:build": "detox build --configuration android.emu.debug",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "clean": "cd android && ./gradlew clean && cd .. && rm -rf node_modules",
+    "reset-cache": "npx react-native start --reset-cache",
+    "reverse": "adb reverse tcp:8081 tcp:8081"
+  },
+  "dependencies": {
+    "@rainbow-fish/shared": "1.0.0",
+    "react": "18.2.0",
+    "react-native": "0.73.0",
+    "react-native-reanimated": "^3.6.0",
+    "react-native-gesture-handler": "^2.14.0",
+    "react-native-screens": "^3.29.0",
+    "react-native-safe-area-context": "^4.8.0",
+    "@react-navigation/native": "^6.1.0",
+    "@react-navigation/stack": "^6.3.0",
+    "@react-navigation/bottom-tabs": "^6.5.0",
+    "react-native-vector-icons": "^10.0.0",
+    "react-native-haptic-feedback": "^2.2.0",
+    "react-native-biometrics": "^3.0.0",
+    "react-native-keychain": "^8.1.0",
+    "react-native-device-info": "^10.11.0",
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "react-native-sound": "^0.11.0",
+    "@react-native-camera/camera": "^7.4.0",
+    "react-native-svg": "^14.1.0",
+    "react-native-permissions": "^4.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
+    "@babel/runtime": "^7.20.0",
+    "@react-native/eslint-config": "^0.73.0",
+    "@react-native/metro-config": "^0.73.0",
+    "@react-native/typescript-config": "^0.73.0",
+    "@types/react": "^18.0.24",
+    "@types/react-test-renderer": "^18.0.0",
+    "babel-jest": "^29.2.1",
+    "detox": "^20.13.0",
+    "eslint": "^8.19.0",
+    "jest": "^29.2.1",
+    "metro-react-native-babel-preset": "0.76.8",
+    "prettier": "^2.4.1",
+    "react-test-renderer": "18.2.0",
+    "typescript": "4.8.4"
+  },
+  "jest": {
+    "preset": "react-native",
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
+  },
+  "detox": {
+    "test-runner": "jest",
+    "runner-config": "e2e/config.json",
+    "configurations": {
+      "android.emu.debug": {
+        "binaryPath": "android/app/build/outputs/apk/debug/app-debug.apk",
+        "build": "cd android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug",
+        "type": "android.emulator",
+        "device": {
+          "avdName": "Pixel_7_API_34"
+        }
+      }
+    }
+  }
+}
