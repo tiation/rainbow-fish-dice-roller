@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -8,105 +8,105 @@ import {
   ScrollView,
   TextInput,
   SafeAreaView,
-  Animated,
 } from 'react-native';
-import { DiceType, DiceRoll } from './src/types';
-import { EnhancedDiceEngine } from './src/services/enhancedDiceEngine';
+
+type DiceType = 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20' | 'd100';
+
+interface DiceResult {
+  id: string;
+  type: DiceType;
+  value: number;
+  timestamp: Date;
+}
+
+interface DiceRoll {
+  id: string;
+  dice: DiceResult[];
+  total: number;
+  expression: string;
+  timestamp: Date;
+}
+
+// Simple dice rolling function
+const rollDie = (sides: number): number => {
+  return Math.floor(Math.random() * sides) + 1;
+};
+
+const generateId = (): string => {
+  return Math.random().toString(36).substr(2, 9);
+};
+import DiceConfig from './src/components/DiceConfig';
 
 export default function App() {
   const [rollHistory, setRollHistory] = useState<DiceRoll[]>([]);
   const [customExpression, setCustomExpression] = useState('1d20');
-  const [isRolling, setIsRolling] = useState(false);
-  const [lastRoll, setLastRoll] = useState<DiceRoll | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const diceEngine = EnhancedDiceEngine.getInstance();
-  const rollAnimation = new Animated.Value(0);
 
-  // Initialize the dice engine
-  useEffect(() => {
-    const initializeEngine = async () => {
-      try {
-        await diceEngine.initialize();
-        const history = diceEngine.getHistory();
-        setRollHistory(history);
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Failed to initialize dice engine:', error);
-        setIsInitialized(true); // Continue anyway
-      }
+  const rollSingleDie = (type: DiceType) => {
+    const sides = {
+      'd4': 4,
+      'd6': 6,
+      'd8': 8,
+      'd10': 10,
+      'd12': 12,
+      'd20': 20,
+      'd100': 100
     };
-    
-    initializeEngine();
-  }, []);
 
-  const playRollAnimation = () => {
-    rollAnimation.setValue(0);
-    Animated.sequence([
-      Animated.timing(rollAnimation, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(rollAnimation, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    const value = rollDie(sides[type]);
+    const result: DiceResult = {
+      id: generateId(),
+      type,
+      value,
+      timestamp: new Date(),
+    };
+
+    const roll: DiceRoll = {
+      id: generateId(),
+      dice: [result],
+      total: value,
+      expression: `1${type}`,
+      timestamp: new Date(),
+    };
+
+    setRollHistory(prev => [...prev, roll]);
   };
 
-  const rollDie = async (type: DiceType) => {
-    if (!isInitialized || isRolling) return;
-    
-    setIsRolling(true);
-    playRollAnimation();
-    
-    try {
-      const result = await diceEngine.rollDie(type);
+  const rollExpression = () => {
+    // Simple expression parser for testing
+    const match = customExpression.match(/(\d*)d(\d+)([+-]\d+)?/);
+    if (match) {
+      const count = parseInt(match[1]) || 1;
+      const sides = parseInt(match[2]);
+      const modifier = match[3] ? parseInt(match[3]) : 0;
+
+      const results: DiceResult[] = [];
+      let total = modifier;
+
+      for (let i = 0; i < count; i++) {
+        const value = rollDie(sides);
+        results.push({
+          id: generateId(),
+          type: `d${sides}` as DiceType,
+          value,
+          timestamp: new Date(),
+        });
+        total += value;
+      }
+
       const roll: DiceRoll = {
-        id: result.id,
-        dice: [result],
-        total: result.value,
-        expression: `1${type}`,
+        id: generateId(),
+        dice: results,
+        total,
+        expression: customExpression,
         timestamp: new Date(),
       };
-      
-      setLastRoll(roll);
-      const history = diceEngine.getHistory();
-      setRollHistory([...history]);
-    } catch (error) {
-      console.error('Failed to roll die:', error);
-    } finally {
-      setIsRolling(false);
+
+      setRollHistory(prev => [...prev, roll]);
     }
   };
 
-  const rollExpression = async () => {
-    if (!isInitialized || isRolling) return;
-    
-    setIsRolling(true);
-    playRollAnimation();
-    
-    try {
-      const roll = await diceEngine.rollExpression(customExpression);
-      setLastRoll(roll);
-      const history = diceEngine.getHistory();
-      setRollHistory([...history]);
-    } catch (error) {
-      console.error('Failed to roll expression:', error);
-    } finally {
-      setIsRolling(false);
-    }
-  };
-
-  const clearHistory = async () => {
-    try {
-      await diceEngine.clearHistory();
-      setRollHistory([]);
-      setLastRoll(null);
-    } catch (error) {
-      console.error('Failed to clear history:', error);
-    }
+  const clearHistory = () => {
+    setRollHistory([]);
   };
 
   const diceTypes: DiceType[] = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'];
@@ -115,54 +115,21 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>🎲 Rainbow Fish Dice Roller</Text>
       
-      {/* Last roll display */}
-      {lastRoll && (
-        <Animated.View 
-          style={[
-            styles.lastRollContainer,
-            {
-              transform: [{
-                scale: rollAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [1, 1.1],
-                }),
-              }],
-            },
-          ]}
-        >
-          <Text style={styles.lastRollLabel}>Last Roll:</Text>
-          <Text style={styles.lastRollExpression}>{lastRoll.expression}</Text>
-          <Text style={styles.lastRollTotal}>{lastRoll.total}</Text>
-        </Animated.View>
-      )}
+{/* Dice Configuration */}
+      <DiceConfig />
 
       {/* Quick dice buttons */}
       <View style={styles.diceGrid}>
         {diceTypes.map((type) => (
           <TouchableOpacity
             key={type}
-            style={[
-              styles.diceButton,
-              isRolling && styles.diceButtonDisabled,
-            ]}
-            onPress={() => rollDie(type)}
-            disabled={isRolling}
+            style={styles.diceButton}
+            onPress={() => rollSingleDie(type)}
           >
-            <Text style={[
-              styles.diceButtonText,
-              isRolling && styles.diceButtonTextDisabled,
-            ]}>
-              {type.toUpperCase()}
-            </Text>
+            <Text style={styles.diceButtonText}>{type.toUpperCase()}</Text>
           </TouchableOpacity>
         ))}
       </View>
-
-      {isRolling && (
-        <View style={styles.rollingIndicator}>
-          <Text style={styles.rollingText}>🎲 Rolling...</Text>
-        </View>
-      )}
 
       {/* Custom expression input */}
       <View style={styles.expressionContainer}>
@@ -325,46 +292,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     marginTop: 50,
-  },
-  lastRollContainer: {
-    backgroundColor: '#1e293b',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 25,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#4fc3f7',
-  },
-  lastRollLabel: {
-    color: '#94a3b8',
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  lastRollExpression: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  lastRollTotal: {
-    color: '#4fc3f7',
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  diceButtonDisabled: {
-    backgroundColor: '#475569',
-    opacity: 0.6,
-  },
-  diceButtonTextDisabled: {
-    color: '#94a3b8',
-  },
-  rollingIndicator: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  rollingText: {
-    color: '#4fc3f7',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 });
